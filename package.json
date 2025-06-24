@@ -1,6 +1,5 @@
-
 {
-  "name": "shadowx-web",
+  "name": "shadow-x-session",
   "version": "1.0.0",
   "description": "Multi-session WhatsApp bot manager",
   "main": "server.js",
@@ -9,8 +8,8 @@
   },
   "dependencies": {
     "express": "^4.18.2",
-    "socket.io": "^4.7.2",
     "qrcode": "^1.5.1",
+    "socket.io": "^4.7.2",
     "whatsapp-web.js": "^1.21.1"
   }
 }
