@@ -1,310 +1,552 @@
-const express = require('express');
-const { createServer } = require('http');
-const { Server } = require('socket.io');
-const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, jidNormalizedUser } = require('@whiskeysockets/baileys');
-const { Boom } = require('@hapi/boom');
-const QRCode = require('qrcode');
-const fs = require('fs');
-const path = require('path');
-const pino = require('pino');
-const cors = require('cors');
-
-const app = express();
-const server = createServer(app);
-const io = new Server(server, {
-    cors: {
-        origin: "*",
-        methods: ["GET", "POST"]
-    }
-});
-
-// Middleware
-app.use(cors());
-app.use(express.json());
-app.use(express.static('public'));
-
-// Session management
-const sessions = new Map();
-const sessionDir = './sessions';
-
-// Ensure sessions directory exists
-if (!fs.existsSync(sessionDir)) {
-    fs.mkdirSync(sessionDir, { recursive: true });
-}
-
-// Logger
-const logger = pino({ level: 'silent' });
-
-class WhatsAppBot {
-    constructor(sessionId) {
-        this.sessionId = sessionId;
-        this.sock = null;
-        this.qr = null;
-        this.isConnected = false;
-        this.authDir = path.join(sessionDir, sessionId);
-    }
-
-    async initialize() {
-        try {
-            // Create auth directory if it doesn't exist
-            if (!fs.existsSync(this.authDir)) {
-                fs.mkdirSync(this.authDir, { recursive: true });
-            }
-
-            const { state, saveCreds } = await useMultiFileAuthState(this.authDir);
-            
-            this.sock = makeWASocket({
-                auth: state,
-                printQRInTerminal: false,
-                logger,
-                browser: ['WhatsApp Bot', 'Chrome', '1.0.0'],
-                defaultQueryTimeoutMs: 60000,
-            });
-
-            // Event handlers
-            this.sock.ev.on('creds.update', saveCreds);
-            this.sock.ev.on('connection.update', this.handleConnectionUpdate.bind(this));
-            this.sock.ev.on('messages.upsert', this.handleMessages.bind(this));
-
-            sessions.set(this.sessionId, this);
-            return this;
-        } catch (error) {
-            console.error(`Error initializing session ${this.sessionId}:`, error);
-            throw error;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Bot Manager</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-    }
 
-    handleConnectionUpdate(update) {
-        const { connection, lastDisconnect, qr } = update;
-        
-        if (qr) {
-            this.qr = qr;
-            QRCode.toDataURL(qr, (err, url) => {
-                if (!err) {
-                    io.to(this.sessionId).emit('qr', { qr: url, sessionId: this.sessionId });
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .session-creator {
+            text-align: center;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #00d2d3 0%, #54a0ff 100%);
+        }
+
+        .sessions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .session-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .session-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .session-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .status-connected {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-connecting {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-disconnected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .qr-container {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .qr-code {
+            max-width: 200px;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .user-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .user-info h4 {
+            color: #1976d2;
+            margin-bottom: 5px;
+        }
+
+        .messages-container {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 15px 0;
+            background: #f8f9fa;
+        }
+
+        .message {
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 8px;
+            background: white;
+            border-left: 4px solid #667eea;
+        }
+
+        .message-header {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 14px;
+        }
+
+        .message-content {
+            margin-top: 5px;
+            color: #333;
+        }
+
+        .message-time {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: #28a745;
+        }
+
+        .notification.error {
+            background: #dc3545;
+        }
+
+        .notification.info {
+            background: #17a2b8;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .sessions-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 WhatsApp Bot Manager</h1>
+            <p>Create and manage multiple WhatsApp bot sessions</p>
+        </div>
+
+        <div class="card session-creator">
+            <h2>Create New Session</h2>
+            <div class="input-group">
+                <label for="sessionId">Session ID (Optional)</label>
+                <input type="text" id="sessionId" placeholder="Leave empty for auto-generated ID">
+            </div>
+            <button class="btn" onclick="createSession()">
+                <span id="createBtnText">Create Session</span>
+                <span id="createBtnLoading" class="loading" style="display: none;"></span>
+            </button>
+        </div>
+
+        <div class="card">
+            <h2>Active Sessions</h2>
+            <button class="btn btn-success" onclick="loadSessions()">Refresh Sessions</button>
+            <div id="sessionsContainer" class="sessions-grid">
+                <!-- Sessions will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        let activeSessions = new Map();
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSessions();
+        });
+
+        // Socket event listeners
+        socket.on('qr', (data) => {
+            displayQR(data.sessionId, data.qr);
+        });
+
+        socket.on('status', (data) => {
+            updateSessionStatus(data.sessionId, data.status, data.user);
+        });
+
+        socket.on('message', (data) => {
+            displayMessage(data.sessionId, data);
+        });
+
+        async function createSession() {
+            const sessionId = document.getElementById('sessionId').value.trim();
+            const createBtn = document.querySelector('.session-creator .btn');
+            const btnText = document.getElementById('createBtnText');
+            const btnLoading = document.getElementById('createBtnLoading');
+            
+            btnText.style.display = 'none';
+            btnLoading.style.display = 'inline-block';
+            createBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/create-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ sessionId: sessionId || undefined }),
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Session created successfully!', 'success');
+                    document.getElementById('sessionId').value = '';
+                    socket.emit('join-session', data.sessionId);
+                    setTimeout(() => loadSessions(), 1000);
+                } else {
+                    showNotification(data.error || 'Failed to create session', 'error');
                 }
-            });
+            } catch (error) {
+                console.error('Error creating session:', error);
+                showNotification('Failed to create session', 'error');
+            } finally {
+                btnText.style.display = 'inline';
+                btnLoading.style.display = 'none';
+                createBtn.disabled = false;
+            }
         }
 
-        if (connection === 'close') {
-            const shouldReconnect = (lastDisconnect?.error as Boom)?.output?.statusCode !== DisconnectReason.loggedOut;
-            console.log(`Connection closed for session ${this.sessionId}. Reconnecting: ${shouldReconnect}`);
-            
-            this.isConnected = false;
-            io.to(this.sessionId).emit('status', { 
-                status: 'disconnected', 
-                sessionId: this.sessionId,
-                shouldReconnect 
-            });
+        async function loadSessions() {
+            try {
+                const response = await fetch('/api/sessions');
+                const data = await response.json();
+                
+                const container = document.getElementById('sessionsContainer');
+                container.innerHTML = '';
 
-            if (shouldReconnect) {
+                if (data.sessions.length === 0) {
+                    container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #666;">No active sessions</p>';
+                    return;
+                }
+
+                data.sessions.forEach(session => {
+                    createSessionCard(session);
+                    socket.emit('join-session', session.sessionId);
+                });
+            } catch (error) {
+                console.error('Error loading sessions:', error);
+                showNotification('Failed to load sessions', 'error');
+            }
+        }
+
+        function createSessionCard(session) {
+            const container = document.getElementById('sessionsContainer');
+            const card = document.createElement('div');
+            card.className = 'session-card';
+            card.id = `session-${session.sessionId}`;
+            
+            card.innerHTML = `
+                <div class="session-status ${getStatusClass(session.isConnected ? 'connected' : 'disconnected')}" id="status-${session.sessionId}">
+                    ${session.isConnected ? 'Connected' : 'Disconnected'}
+                </div>
+                <h3>${session.sessionId}</h3>
+                <div id="qr-${session.sessionId}" class="qr-container" style="display: none;">
+                    <p>Scan this QR code with WhatsApp:</p>
+                    <img class="qr-code" id="qr-img-${session.sessionId}" src="" alt="QR Code">
+                </div>
+                <div id="user-${session.sessionId}" class="user-info" style="display: none;">
+                    <h4>Connected Account</h4>
+                    <p><strong>Name:</strong> <span id="user-name-${session.sessionId}"></span></p>
+                    <p><strong>Number:</strong> <span id="user-number-${session.sessionId}"></span></p>
+                </div>
+                <div class="messages-container" id="messages-${session.sessionId}">
+                    <p style="text-align: center; color: #666;">No messages yet</p>
+                </div>
+                <div style="margin-top: 15px;">
+                    <button class="btn btn-danger" onclick="deleteSession('${session.sessionId}')">Delete Session</button>
+                </div>
+            `;
+            
+            container.appendChild(card);
+            
+            if (session.user) {
+                updateSessionStatus(session.sessionId, 'connected', session.user);
+            }
+        }
+
+        function displayQR(sessionId, qrDataUrl) {
+            const qrContainer = document.getElementById(`qr-${sessionId}`);
+            const qrImg = document.getElementById(`qr-img-${sessionId}`);
+            
+            if (qrContainer && qrImg) {
+                qrImg.src = qrDataUrl;
+                qrContainer.style.display = 'block';
+                
+                const userInfo = document.getElementById(`user-${sessionId}`);
+                if (userInfo) userInfo.style.display = 'none';
+            }
+        }
+
+        function updateSessionStatus(sessionId, status, user) {
+            const statusElement = document.getElementById(`status-${sessionId}`);
+            const qrContainer = document.getElementById(`qr-${sessionId}`);
+            const userInfo = document.getElementById(`user-${sessionId}`);
+            
+            if (statusElement) {
+                statusElement.className = `session-status ${getStatusClass(status)}`;
+                statusElement.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+            }
+            
+            if (status === 'connected' && user) {
+                if (qrContainer) qrContainer.style.display = 'none';
+                if (userInfo) {
+                    userInfo.style.display = 'block';
+                    document.getElementById(`user-name-${sessionId}`).textContent = user.name || 'Unknown';
+                    document.getElementById(`user-number-${sessionId}`).textContent = user.id || 'Unknown';
+                }
+            } else if (status === 'disconnected') {
+                if (qrContainer) qrContainer.style.display = 'none';
+                if (userInfo) userInfo.style.display = 'none';
+            }
+        }
+
+        function displayMessage(sessionId, messageData) {
+            const messagesContainer = document.getElementById(`messages-${sessionId}`);
+            if (!messagesContainer) return;
+            
+            // Clear "no messages" text
+            if (messagesContainer.innerHTML.includes('No messages yet')) {
+                messagesContainer.innerHTML = '';
+            }
+            
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message';
+            messageElement.innerHTML = `
+                <div class="message-header">${messageData.name}</div>
+                <div class="message-content">${messageData.message}</div>
+                <div class="message-time">${new Date(messageData.timestamp).toLocaleTimeString()}</div>
+            `;
+            
+            messagesContainer.appendChild(messageElement);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        async function deleteSession(sessionId) {
+            if (!confirm(`Are you sure you want to delete session "${sessionId}"?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/session/${sessionId}`, {
+                    method: 'DELETE',
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Session deleted successfully!', 'success');
+                    const sessionCard = document.getElementById(`session-${sessionId}`);
+                    if (sessionCard) {
+                        sessionCard.remove();
+                    }
+                } else {
+                    showNotification('Failed to delete session', 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting session:', error);
+                showNotification('Failed to delete session', 'error');
+            }
+        }
+
+        function getStatusClass(status) {
+            switch (status) {
+                case 'connected': return 'status-connected';
+                case 'connecting': return 'status-connecting';
+                case 'disconnected': return 'status-disconnected';
+                default: return 'status-disconnected';
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
                 setTimeout(() => {
-                    this.initialize().catch(console.error);
-                }, 5000);
-            } else {
-                this.cleanup();
-            }
-        } else if (connection === 'open') {
-            console.log(`WhatsApp connected for session: ${this.sessionId}`);
-            this.isConnected = true;
-            io.to(this.sessionId).emit('status', { 
-                status: 'connected', 
-                sessionId: this.sessionId,
-                user: this.sock.user 
-            });
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
         }
-    }
-
-    async handleMessages(m) {
-        try {
-            const msg = m.messages[0];
-            if (!msg.message || msg.key.fromMe) return;
-
-            const messageType = Object.keys(msg.message)[0];
-            let messageContent = '';
-
-            switch (messageType) {
-                case 'conversation':
-                    messageContent = msg.message.conversation;
-                    break;
-                case 'extendedTextMessage':
-                    messageContent = msg.message.extendedTextMessage.text;
-                    break;
-                default:
-                    messageContent = `[${messageType}]`;
-            }
-
-            const sender = jidNormalizedUser(msg.key.remoteJid);
-            const senderName = msg.pushName || sender.split('@')[0];
-
-            // Emit message to connected clients
-            io.to(this.sessionId).emit('message', {
-                sessionId: this.sessionId,
-                from: sender,
-                name: senderName,
-                message: messageContent,
-                type: messageType,
-                timestamp: new Date()
-            });
-
-            // Auto-reply example
-            if (messageContent.toLowerCase().includes('hello') || messageContent.toLowerCase().includes('hi')) {
-                await this.sendMessage(sender, 'Hello! How can I help you today?');
-            }
-
-        } catch (error) {
-            console.error('Error handling message:', error);
-        }
-    }
-
-    async sendMessage(to, message) {
-        try {
-            if (!this.isConnected) throw new Error('Bot not connected');
-            
-            await this.sock.sendMessage(to, { text: message });
-            return { success: true };
-        } catch (error) {
-            console.error('Error sending message:', error);
-            return { success: false, error: error.message };
-        }
-    }
-
-    cleanup() {
-        if (this.sock) {
-            this.sock.end();
-        }
-        sessions.delete(this.sessionId);
-        
-        // Clean up session files
-        if (fs.existsSync(this.authDir)) {
-            fs.rmSync(this.authDir, { recursive: true, force: true });
-        }
-    }
-}
-
-// Socket.IO connection handling
-io.on('connection', (socket) => {
-    console.log('Client connected:', socket.id);
-
-    socket.on('join-session', (sessionId) => {
-        socket.join(sessionId);
-        console.log(`Client joined session: ${sessionId}`);
-        
-        const session = sessions.get(sessionId);
-        if (session) {
-            socket.emit('status', { 
-                status: session.isConnected ? 'connected' : 'connecting',
-                sessionId: sessionId,
-                user: session.sock?.user 
-            });
-        }
-    });
-
-    socket.on('disconnect', () => {
-        console.log('Client disconnected:', socket.id);
-    });
-});
-
-// API Routes
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-app.post('/api/create-session', async (req, res) => {
-    try {
-        const sessionId = req.body.sessionId || `session_${Date.now()}`;
-        
-        if (sessions.has(sessionId)) {
-            return res.status(400).json({ 
-                error: 'Session already exists',
-                sessionId 
-            });
-        }
-
-        const bot = new WhatsAppBot(sessionId);
-        await bot.initialize();
-
-        res.json({ 
-            success: true, 
-            sessionId,
-            message: 'Session created successfully' 
-        });
-    } catch (error) {
-        console.error('Error creating session:', error);
-        res.status(500).json({ 
-            error: 'Failed to create session',
-            details: error.message 
-        });
-    }
-});
-
-app.get('/api/sessions', (req, res) => {
-    const sessionList = Array.from(sessions.keys()).map(id => ({
-        sessionId: id,
-        isConnected: sessions.get(id).isConnected,
-        user: sessions.get(id).sock?.user
-    }));
-    
-    res.json({ sessions: sessionList });
-});
-
-app.post('/api/send-message', async (req, res) => {
-    try {
-        const { sessionId, to, message } = req.body;
-        
-        if (!sessionId || !to || !message) {
-            return res.status(400).json({ 
-                error: 'Missing required fields: sessionId, to, message' 
-            });
-        }
-
-        const session = sessions.get(sessionId);
-        if (!session) {
-            return res.status(404).json({ 
-                error: 'Session not found' 
-            });
-        }
-
-        const result = await session.sendMessage(to, message);
-        res.json(result);
-    } catch (error) {
-        console.error('Error sending message:', error);
-        res.status(500).json({ 
-            error: 'Failed to send message',
-            details: error.message 
-        });
-    }
-});
-
-app.delete('/api/session/:sessionId', (req, res) => {
-    const { sessionId } = req.params;
-    const session = sessions.get(sessionId);
-    
-    if (!session) {
-        return res.status(404).json({ error: 'Session not found' });
-    }
-
-    session.cleanup();
-    res.json({ success: true, message: 'Session deleted successfully' });
-});
-
-// Graceful shutdown
-process.on('SIGINT', () => {
-    console.log('\nShutting down gracefully...');
-    
-    // Close all sessions
-    sessions.forEach(session => {
-        session.cleanup();
-    });
-    
-    server.close(() => {
-        console.log('Server closed');
-        process.exit(0);
-    });
-});
-
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-    console.log(`🚀 WhatsApp Bot Server running on port ${PORT}`);
-    console.log(`📱 Visit http://localhost:${PORT} to manage your bot`);
-});
+    </script>
+</body>
+</html>
