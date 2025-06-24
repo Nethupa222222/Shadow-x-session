@@ -5,7 +5,365 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shadow-N Pro - WhatsApp Bot Pairing</title>
     <style>
-        /* Your existing CSS remains the same */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 118, 117, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(255, 177, 153, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 
+                0 25px 50px -12px rgba(0, 0, 0, 0.25),
+                0 0 0 1px rgba(255, 255, 255, 0.3);
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .logo {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4, #45b7d1, #ff6b6b);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+            animation: gradientShift 3s ease-in-out infinite, glow 2s ease-in-out infinite alternate;
+            position: relative;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes glow {
+            from {
+                filter: drop-shadow(0 0 5px rgba(255, 107, 107, 0.3));
+                transform: scale(1);
+            }
+            to {
+                filter: drop-shadow(0 0 15px rgba(76, 205, 196, 0.5));
+                transform: scale(1.02);
+            }
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            font-size: 16px;
+            margin-bottom: 32px;
+            font-weight: 500;
+        }
+
+        .input-group {
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .phone-input {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .phone-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .method-selector {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            background: rgba(248, 250, 252, 0.8);
+            padding: 6px;
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        .method-btn {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: transparent;
+            color: #64748b;
+        }
+
+        .method-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .method-btn:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.8);
+            color: #475569;
+        }
+
+        .connect-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            border: none;
+            border-radius: 16px;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
+            margin-bottom: 24px;
+        }
+
+        .connect-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(255, 107, 107, 0.4);
+        }
+
+        .connect-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 24px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.9));
+            border-radius: 16px;
+            margin-bottom: 24px;
+            backdrop-filter: blur(10px);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .pairing-code, .qr-container {
+            display: none;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.95));
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .pairing-code h3, .qr-container h3 {
+            text-align: center;
+            color: #334155;
+            margin-bottom: 16px;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .code-display {
+            font-size: 32px;
+            font-weight: 900;
+            text-align: center;
+            color: #1e293b;
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 24px 0;
+            letter-spacing: 4px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .qr-code {
+            display: flex;
+            justify-content: center;
+            margin: 24px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .qr-placeholder {
+            width: 256px;
+            height: 256px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+            border-radius: 12px;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .pairing-code p, .qr-container p {
+            margin: 8px 0;
+            color: #475569;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .pairing-code strong, .qr-container strong {
+            color: #1e293b;
+            font-weight: 700;
+        }
+
+        .countdown {
+            text-align: center;
+            font-weight: 600;
+            color: #ef4444;
+            margin-top: 16px;
+            padding: 12px;
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 12px;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .status {
+            display: none;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+
+        .status.success {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(16, 185, 129, 0.1));
+            color: #059669;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .status.error {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1));
+            color: #dc2626;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .instructions {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(147, 51, 234, 0.05));
+            padding: 20px;
+            border-radius: 16px;
+            color: #475569;
+            font-size: 14px;
+            line-height: 1.6;
+            border: 1px solid rgba(59, 130, 246, 0.1);
+        }
+
+        .instructions strong {
+            color: #1e293b;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 24px;
+                margin: 10px;
+            }
+            
+            .logo {
+                font-size: 28px;
+            }
+            
+            .method-selector {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .method-btn {
+                padding: 14px;
+            }
+        }
+
+        /* Enhanced animations */
+        .container {
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pairing-code, .qr-container {
+            animation: fadeInScale 0.4s ease-out;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
     </style>
 </head>
 <body>
@@ -73,6 +431,7 @@
         let isConnected = false;
         let countdownInterval = null;
         let connectionAttempted = false;
+        let actuallyConnected = false; // Track real connection status
 
         // Method selection
         document.querySelectorAll('.method-btn').forEach(btn => {
@@ -83,14 +442,16 @@
                 hideAllMethods();
                 // Reset connection state when method changes
                 connectionAttempted = false;
+                actuallyConnected = false;
                 document.getElementById('connectBtn').textContent = 'Generate Connection';
+                document.getElementById('connectBtn').disabled = false;
             });
         });
 
         // Connect button handler
         document.getElementById('connectBtn').addEventListener('click', initializeConnection);
 
-        // Phone input validation
+        // Phone input validation with improved formatting
         document.getElementById('phoneInput').addEventListener('input', (e) => {
             let value = e.target.value.replace(/[^\d+]/g, '');
             if (value && !value.startsWith('+')) {
@@ -106,6 +467,16 @@
             if (countdownInterval) {
                 clearInterval(countdownInterval);
                 countdownInterval = null;
+            }
+            
+            // Clear any pending verification timeouts when hiding methods
+            if (window.currentVerificationTimeout) {
+                clearTimeout(window.currentVerificationTimeout);
+                window.currentVerificationTimeout = null;
+            }
+            if (window.currentQrVerificationTimeout) {
+                clearTimeout(window.currentQrVerificationTimeout);
+                window.currentQrVerificationTimeout = null;
             }
         }
 
@@ -200,7 +571,8 @@
                         ttl: 120000
                     };
 
-                    const qrString = `${qrData.ref},${qrData.publicKey},${qrData.clientToken},${qrData.serverToken}`;
+                    // Create a more realistic WhatsApp Web QR string format
+                    const qrString = `2@${qrData.ref},${qrData.publicKey},${qrData.clientToken},${qrData.serverToken},${qrData.browserToken}`;
                     
                     return {
                         success: true,
@@ -220,184 +592,4 @@
                 let ref = '';
                 for (let i = 0; i < 20; i++) {
                     ref += chars.charAt(Math.floor(Math.random() * chars.length));
-                }
-                return ref;
-            }
-
-            generateServerToken() {
-                return CryptoJS.lib.WordArray.random(16).toString();
-            }
-
-            generateBrowserToken() {
-                const browserInfo = {
-                    userAgent: navigator.userAgent,
-                    platform: navigator.platform,
-                    language: navigator.language,
-                    timestamp: Date.now()
-                };
-                return btoa(JSON.stringify(browserInfo)).substring(0, 32);
-            }
-
-            async simulateWhatsAppAPI(endpoint, data) {
-                await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
-                
-                if (endpoint === 'requestPairingCode') {
-                    const code = this.generateRealPairingCode();
-                    
-                    return {
-                        success: true,
-                        pairingCode: code,
-                        serverToken: this.generateServerToken(),
-                        clientToken: this.clientId,
-                        ref: this.generateRef(),
-                        expiresAt: Date.now() + 300000
-                    };
-                }
-                
-                return { success: false, error: 'Unknown endpoint' };
-            }
-
-            generateRealPairingCode() {
-                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-                let code = '';
-                
-                for (let i = 0; i < 4; i++) {
-                    code += chars.charAt(Math.floor(Math.random() * chars.length));
-                }
-                
-                code += '-';
-                
-                for (let i = 0; i < 4; i++) {
-                    code += chars.charAt(Math.floor(Math.random() * chars.length));
-                }
-                
-                return code;
-            }
-
-            async verifyPairingCode(code, phoneNumber) {
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                
-                return {
-                    success: true,
-                    sessionId: `SHADOW-N-${this.clientId}`,
-                    connectedAt: new Date().toISOString()
-                };
-            }
-        }
-
-        const whatsappClient = new WhatsAppWebClient();
-
-        function generateWhatsAppPairingCode(phoneNumber) {
-            return whatsappClient.requestPairingCode(phoneNumber);
-        }
-
-        function generateWhatsAppQRData(phoneNumber) {
-            return whatsappClient.generateQRData(phoneNumber);
-        }
-
-        function startCountdown(elementId, seconds, onComplete) {
-            let timeLeft = seconds;
-            const element = document.getElementById(elementId);
-            
-            countdownInterval = setInterval(() => {
-                const minutes = Math.floor(timeLeft / 60);
-                const secs = timeLeft % 60;
-                element.textContent = `Code expires in ${minutes}:${secs.toString().padStart(2, '0')}`;
-                
-                if (timeLeft <= 0) {
-                    clearInterval(countdownInterval);
-                    if (onComplete) onComplete();
-                }
-                timeLeft--;
-            }, 1000);
-        }
-
-        async function initializeConnection() {
-            const phoneInput = document.getElementById('phoneInput');
-            const phoneNumber = phoneInput.value.trim();
-            
-            if (!phoneNumber) {
-                showStatus('Please enter your phone number with country code', 'error');
-                return;
-            }
-
-            if (!phoneNumber.startsWith('+')) {
-                showStatus('Please include country code (e.g. +1 for US)', 'error');
-                return;
-            }
-
-            if (connectionAttempted) {
-                // If already attempted connection, don't do it again
-                return;
-            }
-
-            connectionAttempted = true;
-            document.getElementById('connectBtn').disabled = true;
-            document.getElementById('loading').style.display = 'block';
-            hideAllMethods();
-
-            try {
-                if (selectedMethod === 'pairing') {
-                    const result = await generateWhatsAppPairingCode(phoneNumber);
-                    
-                    if (result.success) {
-                        document.getElementById('codeDisplay').textContent = result.pairingCode;
-                        document.getElementById('pairingCode').style.display = 'block';
-                        startCountdown('codeCountdown', result.expiresIn, () => {
-                            showStatus('Pairing code has expired. Please generate a new one.', 'error');
-                        });
-                        
-                        // Simulate connection verification
-                        setTimeout(async () => {
-                            const verification = await whatsappClient.verifyPairingCode(result.pairingCode, phoneNumber);
-                            if (verification.success) {
-                                showStatus('Successfully connected to WhatsApp!', 'success');
-                                document.getElementById('connectBtn').textContent = 'Connected to WhatsApp';
-                                isConnected = true;
-                            }
-                        }, 5000);
-                    } else {
-                        showStatus(result.error || 'Failed to generate pairing code', 'error');
-                        connectionAttempted = false;
-                    }
-                } else if (selectedMethod === 'qr') {
-                    const result = await generateWhatsAppQRData(phoneNumber);
-                    
-                    if (result.success) {
-                        document.getElementById('qrCode').innerHTML = '';
-                        new QRCode(document.getElementById('qrCode'), {
-                            text: result.qrData,
-                            width: 256,
-                            height: 256,
-                            colorDark: "#000000",
-                            colorLight: "#ffffff",
-                            correctLevel: QRCode.CorrectLevel.H
-                        });
-                        
-                        document.getElementById('qrContainer').style.display = 'block';
-                        startCountdown('qrCountdown', result.expiresIn, () => {
-                            showStatus('QR code has expired. Please generate a new one.', 'error');
-                        });
-                        
-                        // Simulate QR code scan
-                        setTimeout(async () => {
-                            showStatus('Successfully connected to WhatsApp!', 'success');
-                            document.getElementById('connectBtn').textContent = 'Connected to WhatsApp';
-                            isConnected = true;
-                        }, 5000);
-                    } else {
-                        showStatus(result.error || 'Failed to generate QR code', 'error');
-                        connectionAttempted = false;
-                    }
-                }
-            } catch (error) {
-                showStatus('An error occurred: ' + error.message, 'error');
-                connectionAttempted = false;
-            } finally {
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('connectBtn').disabled = false;
-            }
-        }
-    </script>
-</body>
-    </html>
+          
