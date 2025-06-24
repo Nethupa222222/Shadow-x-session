@@ -13,12 +13,25 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k=') center/cover no-repeat,
+                     linear-gradient(135deg, #f5f1e8 0%, #e8ddd4 50%, #d4c4b0 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.3) 100%);
+            z-index: 1;
         }
 
         .container {
@@ -31,6 +44,8 @@
             max-width: 450px;
             text-align: center;
             transition: all 0.3s ease;
+            position: relative;
+            z-index: 2;
         }
 
         .container:hover {
@@ -41,12 +56,44 @@
         .logo {
             font-size: 2.5rem;
             font-weight: bold;
-            color: #333;
             margin-bottom: 10px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(45deg, #ff0000, #00ff00, #0000ff, #ffff00, #ff00ff, #00ffff);
+            background-size: 400% 400%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            animation: rgbGlow 8s ease-in-out infinite;
+        }
+
+        @keyframes rgbGlow {
+            0% {
+                background-position: 0% 50%;
+                filter: drop-shadow(0 0 10px rgba(255, 0, 0, 0.5));
+            }
+            16.66% {
+                background-position: 25% 25%;
+                filter: drop-shadow(0 0 12px rgba(255, 127, 0, 0.5));
+            }
+            33.33% {
+                background-position: 50% 0%;
+                filter: drop-shadow(0 0 15px rgba(255, 255, 0, 0.5));
+            }
+            50% {
+                background-position: 75% 25%;
+                filter: drop-shadow(0 0 18px rgba(0, 255, 0, 0.5));
+            }
+            66.66% {
+                background-position: 100% 50%;
+                filter: drop-shadow(0 0 20px rgba(0, 0, 255, 0.5));
+            }
+            83.33% {
+                background-position: 75% 75%;
+                filter: drop-shadow(0 0 15px rgba(127, 0, 255, 0.5));
+            }
+            100% {
+                background-position: 0% 50%;
+                filter: drop-shadow(0 0 10px rgba(255, 0, 255, 0.5));
+            }
         }
 
         .subtitle {
@@ -322,7 +369,7 @@
         }
 
         function generateSessionId() {
-            return 'SN-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+            return 'SHADOW-N-PRO-' + Math.random().toString(36).substr(2, 9).toUpperCase();
         }
 
         function generatePairingCode() {
@@ -393,7 +440,7 @@
             isConnected = true;
             hideAllMethods();
             
-            showStatus(`✅ Successfully connected! Session ID: ${sessionId}`, 'success');
+            showStatus(`✅ Successfully connected!`, 'success');
             
             // Simulate sending welcome message
             setTimeout(() => {
@@ -407,25 +454,60 @@
 
         function sendWelcomeMessage(phoneNumber) {
             // In a real implementation, this would send an actual WhatsApp message
-            const welcomeMessage = `🎉 Welcome to Shadow-N Pro!
+            const welcomeMessage = `🌟 *WELCOME TO SHADOW-N PRO* 🌟
 
-✅ Your WhatsApp bot is now connected successfully!
+🎉 *Congratulations!* Your WhatsApp bot is now successfully connected!
 
-📱 Session ID: ${sessionId}
+🔐 *Your Session Details:*
+📱 Session ID: \`${sessionId}\`
 🔗 Connected Number: ${phoneNumber}
-⚡ Bot Status: Active
+⚡ Bot Status: *ACTIVE*
+🕒 Connected At: ${new Date().toLocaleString()}
 
-🚀 Your Shadow-N Pro bot is ready to use! You can now enjoy all premium features.
+🚀 *About Shadow-N Pro:*
+• Most Advanced WhatsApp Bot Available
+• 24/7 Automated Responses
+• Premium Features Unlocked
+• Multi-Language Support
+• Advanced AI Integration
+• Custom Commands & Automation
+• Media Processing Capabilities
+• Group Management Tools
 
-Thank you for choosing Shadow-N Pro - The most advanced WhatsApp bot! 🌟
+✨ *Premium Features Now Active:*
+• Auto-Reply System
+• Smart Filtering
+• Custom Stickers
+• Voice Message Processing
+• Document Converter
+• Link Shortener
+• Weather Updates
+• News & Updates
 
-Need help? Type /help to see all available commands.`;
+⚠️ *IMPORTANT SECURITY WARNING:*
+🔒 *NEVER SHARE YOUR SESSION ID WITH ANYONE!*
+🛡️ Your session ID is like your password - keep it private!
+🚫 Shadow-N Pro team will NEVER ask for your session ID
+🔐 Store it safely and don't share in groups or with strangers
+⚡ If compromised, immediately disconnect and reconnect
+
+💡 *Getting Started:*
+Type \`/help\` to see all available commands
+Type \`/menu\` to access the main menu
+Type \`/settings\` to customize your bot
+
+🎯 *Need Support?*
+Contact our support team anytime!
+
+Thank you for choosing Shadow-N Pro - Experience the future of WhatsApp automation! 🚀
+
+*Shadow-N Pro Team* 💜`;
 
             console.log('Sending welcome message:', welcomeMessage);
             
             // Show success notification
             setTimeout(() => {
-                showStatus('✅ Welcome message sent to your WhatsApp!', 'success');
+                showStatus('✅ Welcome message with session ID sent to your WhatsApp!', 'success');
             }, 1500);
         }
 
