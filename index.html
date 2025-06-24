@@ -419,7 +419,7 @@
         let isConnected = false;
         let countdownInterval = null;
         let connectionAttempted = false;
-        let actuallyConnected = false; // Track real connection status
+        let actuallyConnected = false;
 
         // Method selection
         document.querySelectorAll('.method-btn').forEach(btn => {
@@ -428,7 +428,6 @@
                 btn.classList.add('active');
                 selectedMethod = btn.dataset.method;
                 hideAllMethods();
-                // Reset connection state when method changes
                 connectionAttempted = false;
                 actuallyConnected = false;
                 document.getElementById('connectBtn').textContent = 'Generate Connection';
@@ -457,7 +456,6 @@
                 countdownInterval = null;
             }
             
-            // Clear any pending verification timeouts when hiding methods
             if (window.currentVerificationTimeout) {
                 clearTimeout(window.currentVerificationTimeout);
                 window.currentVerificationTimeout = null;
@@ -479,7 +477,6 @@
             return 'SHADOW-N-PRO-' + Math.random().toString(36).substr(2, 9).toUpperCase();
         }
 
-        // WhatsApp Web Protocol Implementation
         class WhatsAppWebClient {
             constructor() {
                 this.clientId = this.generateClientId();
@@ -521,20 +518,18 @@
                         timestamp: Date.now()
                     };
 
-                    const response = await this.simulateWhatsAppAPI('requestPairingCode', connectionData);
-                    
-                    if (response.success) {
-                        this.serverToken = response.serverToken;
-                        this.clientToken = response.clientToken;
-                        return {
-                            success: true,
-                            pairingCode: response.pairingCode,
-                            expiresIn: 300,
-                            ref: response.ref
-                        };
-                    } else {
-                        throw new Error(response.error || 'Failed to generate pairing code');
-                    }
+                    // Simulate API call with delay
+                    return new Promise(resolve => {
+                        setTimeout(() => {
+                            const code = Math.floor(100000 + Math.random() * 900000);
+                            resolve({
+                                success: true,
+                                pairingCode: code.toString(),
+                                expiresIn: 300,
+                                ref: 'REF-' + Math.random().toString(36).substr(2, 8).toUpperCase()
+                            });
+                        }, 1500);
+                    });
                 } catch (error) {
                     console.error('Pairing code generation failed:', error);
                     return {
@@ -548,25 +543,18 @@
                 try {
                     await this.generateKeypair();
                     
-                    const qrData = {
-                        ref: this.generateRef(),
-                        publicKey: this.keypair.public,
-                        clientToken: this.clientId,
-                        serverToken: this.generateServerToken(),
-                        browserToken: this.generateBrowserToken(),
-                        secret: CryptoJS.lib.WordArray.random(32).toString(),
-                        timestamp: Date.now(),
-                        ttl: 120000
-                    };
-
-                    // Create a more realistic WhatsApp Web QR string format
-                    const qrString = `2@${qrData.ref},${qrData.publicKey},${qrData.clientToken},${qrData.serverToken},${qrData.browserToken}`;
-                    
-                    return {
-                        success: true,
-                        qrData: qrString,
-                        expiresIn: 30 // 30 seconds
-                    };
+                    // Simulate QR generation with delay
+                    return new Promise(resolve => {
+                        setTimeout(() => {
+                            const ref = 'REF-' + Math.random().toString(36).substr(2, 8).toUpperCase();
+                            const qrString = `2@${ref},${this.keypair.public},${this.clientId},SRV-${Math.random().toString(36).substr(2, 8)},BRO-${Math.random().toString(36).substr(2, 8)}`;
+                            resolve({
+                                success: true,
+                                qrData: qrString,
+                                expiresIn: 30
+                            });
+                        }, 1500);
+                    });
                 } catch (error) {
                     return {
                         success: false,
@@ -574,18 +562,34 @@
                     };
                 }
             }
+        }
 
-            generateRef() {
-                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-                let ref = '';
-                for (let i = 0; i < 20; i++) {
-                    ref += chars.charAt(Math.floor(Math.random() * chars.length));
+        function startCountdown(elementId, seconds, callback) {
+            const element = document.getElementById(elementId);
+            let remaining = seconds;
+            
+            updateCountdown();
+            
+            countdownInterval = setInterval(() => {
+                remaining--;
+                updateCountdown();
+                
+                if (remaining <= 0) {
+                    clearInterval(countdownInterval);
+                    if (callback) callback();
                 }
-                return ref;
+            }, 1000);
+            
+            function updateCountdown() {
+                const minutes = Math.floor(remaining / 60);
+                const secs = remaining % 60;
+                element.textContent = `Expires in: ${minutes}:${secs < 10 ? '0' + secs : secs}`;
             }
+        }
 
-            generateServerToken() {
-                return CryptoJS.lib.WordArray.random(16).toString();
-            }
+        function generateRandomCode() {
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
 
-            g
+        async function initializeConnection() {
+ 
