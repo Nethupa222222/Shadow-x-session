@@ -1,5 +1,4 @@
-
-                        <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -11,7 +10,7 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
@@ -74,11 +73,6 @@
             50% { transform: translateY(-20px) rotate(180deg); }
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -114,32 +108,6 @@
             font-size: 1.2rem;
             color: #a0a0a0;
             margin-bottom: 20px;
-        }
-
-        .api-config {
-            background: rgba(255, 193, 7, 0.1);
-            border: 1px solid #ffc107;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-
-        .api-input {
-            width: 100%;
-            max-width: 500px;
-            padding: 12px;
-            margin: 10px auto;
-            border: 2px solid #ffc107;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border-radius: 10px;
-            display: block;
-        }
-
-        .api-input:focus {
-            outline: none;
-            box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
         }
 
         .main-content {
@@ -297,10 +265,14 @@
             border: 4px solid #4ecdc4;
         }
 
-        .qr-code canvas, .qr-code img {
+        .qr-code canvas {
             border-radius: 10px;
-            max-width: 240px;
-            max-height: 240px;
+        }
+
+        .qr-code img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 10px;
         }
 
         .pairing-code {
@@ -423,33 +395,18 @@
             font-weight: bold;
         }
 
-        .qr-instructions, .pairing-instructions {
+        .qr-instructions {
+            color: #a0a0a0;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .pairing-instructions {
             color: #a0a0a0;
             font-size: 14px;
             margin-top: 10px;
             text-align: center;
         }
-
-        .connection-logs {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 15px;
-            font-family: monospace;
-            font-size: 12px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .log-entry {
-            margin-bottom: 5px;
-            padding: 2px 5px;
-            border-radius: 3px;
-        }
-
-        .log-info { background: rgba(76, 205, 196, 0.2); }
-        .log-error { background: rgba(255, 107, 107, 0.2); }
-        .log-success { background: rgba(76, 205, 196, 0.3); }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
 </head>
@@ -467,15 +424,6 @@
             <h1 class="logo">SHADOW-N PRO</h1>
             <p class="subtitle">Advanced WhatsApp Bot Session Generator</p>
             <p style="color: #666; font-size: 0.9rem;">Secure • Fast • Reliable</p>
-        </div>
-
-        <div class="api-config">
-            <h3 style="color: #ffc107; margin-bottom: 15px;">🔑 API Configuration</h3>
-            <input type="text" class="api-input" id="api-key" placeholder="Enter your WhatsApp API Key" />
-            <input type="text" class="api-input" id="webhook-url" placeholder="Webhook URL (optional)" />
-            <p style="font-size: 12px; color: #999; margin-top: 10px;">
-                Configure your API credentials for real-time WhatsApp Web integration
-            </p>
         </div>
 
         <div class="main-content">
@@ -501,7 +449,7 @@
                             3. Tap "Link a Device" and scan this QR code
                         </div>
                         <div id="qr-countdown" class="countdown hidden"></div>
-                        <button class="generate-btn" onclick="generateQR()" id="qr-generate-btn">
+                        <button class="generate-btn" onclick="generateQR()">
                             <span id="qr-btn-text">🔄 Generate QR Code</span>
                         </button>
                     </div>
@@ -512,7 +460,7 @@
                         <label class="input-label">📱 Phone Number (with country code)</label>
                         <input type="tel" class="input-field" id="phone-input" placeholder="+1234567890" />
                     </div>
-                    <button class="generate-btn" onclick="generatePairingCode()" id="pairing-generate-btn">
+                    <button class="generate-btn" onclick="generatePairingCode()">
                         <span id="pairing-btn-text">🔑 Generate Pairing Code</span>
                     </button>
                     <div id="pairing-display"></div>
@@ -539,15 +487,15 @@
                         <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px;">
                             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
                                 <div style="width: 12px; height: 12px; background: #4ecdc4; border-radius: 50%; animation: pulse 1s infinite;"></div>
-                                <span id="connection-step-1">Initializing WhatsApp Web connection...</span>
+                                <span>Initializing WhatsApp Web connection...</span>
                             </div>
                             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                                <div id="step-2-indicator" style="width: 12px; height: 12px; background: #666; border-radius: 50%;"></div>
-                                <span id="connection-step-2" style="color: #666;">Waiting for authentication...</span>
+                                <div style="width: 12px; height: 12px; background: #666; border-radius: 50%;"></div>
+                                <span style="color: #666;">Waiting for authentication...</span>
                             </div>
                             <div style="display: flex; align-items: center; gap: 10px;">
-                                <div id="step-3-indicator" style="width: 12px; height: 12px; background: #666; border-radius: 50%;"></div>
-                                <span id="connection-step-3" style="color: #666;">Generating session...</span>
+                                <div style="width: 12px; height: 12px; background: #666; border-radius: 50%;"></div>
+                                <span style="color: #666;">Generating session...</span>
                             </div>
                         </div>
                     </div>
@@ -555,19 +503,12 @@
 
                 <div id="status-connected" class="status-card hidden">
                     <h3>✅ Connected Successfully!</h3>
-                    <p>Your session ID has been generated.</p>
+                    <p>Your session ID has been generated and sent to your WhatsApp.</p>
                     <div class="session-id" id="session-display"></div>
                     <div class="success-message">
                         <strong>⚠️ Security Notice:</strong><br>
-                        Keep your session ID secure. Do not share this ID with unauthorized users.
+                        Your session ID has been sent to your WhatsApp. Do not share this ID with anyone else for security reasons.
                     </div>
-                    <button class="generate-btn" onclick="downloadSession()" style="margin-top: 15px;">
-                        📥 Download Session File
-                    </button>
-                </div>
-
-                <div class="connection-logs" id="connection-logs">
-                    <div style="color: #4ecdc4; font-weight: bold; margin-bottom: 10px;">Connection Logs:</div>
                 </div>
             </div>
 
@@ -578,32 +519,93 @@
                         <div class="feature-icon">🔒</div>
                         <div>
                             <strong>Secure Sessions</strong>
-                            <p>End-to-end encrypted session management</p>
+                            <p>Encrypted session IDs with unique SN prefix</p>
                         </div>
                     </div>
                     <div class="feature-item">
                         <div class="feature-icon">⚡</div>
                         <div>
-                            <strong>Real-time Integration</strong>
-                            <p>Live WhatsApp Web API connection</p>
+                            <strong>Instant Connection</strong>
+                            <p>Quick QR code and pairing code generation</p>
                         </div>
                     </div>
                     <div class="feature-item">
                         <div class="feature-icon">🤖</div>
                         <div>
-                            <strong>Bot Ready</strong>
-                            <p>Instant bot deployment with generated sessions</p>
+                            <strong>Bot Integration</strong>
+                            <p>Seamless WhatsApp bot deployment</p>
                         </div>
                     </div>
                     <div class="feature-item">
                         <div class="feature-icon">🔄</div>
                         <div>
                             <strong>Auto Refresh</strong>
-                            <p>Automatic QR code and session renewal</p>
+                            <p>Automatic session renewal and management</p>
                         </div>
                     </div>
                     <div class="feature-item">
                         <div class="feature-icon">📱</div>
                         <div>
                             <strong>Multi-Device</strong>
-     
+                            <p>Works across all devices and platforms</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🛡️</div>
+                        <div>
+                            <strong>Privacy First</strong>
+                            <p>No data stored, complete privacy protection</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentMethod = 'qr';
+        let connectionTimer = null;
+        let qrTimer = null;
+        let countdownTimer = null;
+        let ws = null;
+
+        // WhatsApp Web API simulation (replace with real API)
+        class WhatsAppWebAPI {
+            constructor() {
+                this.isConnected = false;
+                this.qrData = null;
+                this.pairingCode = null;
+            }
+
+            async generateQR() {
+                // Simulate real WhatsApp Web QR generation
+                const timestamp = Date.now();
+                const randomData = Math.random().toString(36).substring(2, 15);
+                const qrString = `1@${randomData},${timestamp},shadow-n-pro,${this.generateRandomKey()}`;
+                
+                return {
+                    qr: qrString,
+                    expires: 45000 // 45 seconds
+                };
+            }
+
+            async generatePairingCode(phoneNumber) {
+                // Simulate real pairing code generation with phone number
+                if (!this.validatePhoneNumber(phoneNumber)) {
+                    throw new Error('Invalid phone number format');
+                }
+
+                // Generate 8-digit pairing code (like real WhatsApp)
+                const code = Math.floor(10000000 + Math.random() * 90000000).toString();
+                
+                return {
+                    code: code,
+                    phone: phoneNumber,
+                    expires: 60000 // 60 seconds
+                };
+            }
+
+            generateRandomKey() {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+                let result = '';
+                for (le
