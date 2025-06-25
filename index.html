@@ -49,6 +49,7 @@
                 0 0 0 1px rgba(255, 255, 255, 0.3);
             position: relative;
             border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: slideUp 0.6s ease-out;
         }
 
         .logo {
@@ -58,17 +59,18 @@
             margin-bottom: 8px;
             letter-spacing: -0.5px;
             position: relative;
-            animation: rgbShift 8s linear infinite;
+            animation: colorfulRgbShift 3s ease-in-out infinite;
         }
 
-        @keyframes rgbShift {
-            0% { color: #ff0000; text-shadow: 0 0 20px rgba(255, 0, 0, 0.5); }
-            16.66% { color: #ff8000; text-shadow: 0 0 20px rgba(255, 128, 0, 0.5); }
-            33.33% { color: #ffff00; text-shadow: 0 0 20px rgba(255, 255, 0, 0.5); }
-            50% { color: #00ff00; text-shadow: 0 0 20px rgba(0, 255, 0, 0.5); }
-            66.66% { color: #0080ff; text-shadow: 0 0 20px rgba(0, 128, 255, 0.5); }
-            83.33% { color: #8000ff; text-shadow: 0 0 20px rgba(128, 0, 255, 0.5); }
-            100% { color: #ff0000; text-shadow: 0 0 20px rgba(255, 0, 0, 0.5); }
+        @keyframes colorfulRgbShift {
+            0% { color: #ff0000; }
+            16% { color: #ff8800; }
+            32% { color: #ffff00; }
+            48% { color: #00ff00; }
+            64% { color: #00ffff; }
+            80% { color: #0088ff; }
+            96% { color: #8800ff; }
+            100% { color: #ff0000; }
         }
 
         .subtitle {
@@ -77,29 +79,6 @@
             font-size: 16px;
             margin-bottom: 32px;
             font-weight: 500;
-        }
-
-        .input-group {
-            margin-bottom: 24px;
-            position: relative;
-        }
-
-        .phone-input {
-            width: 100%;
-            padding: 16px 20px;
-            border: 2px solid #e2e8f0;
-            border-radius: 16px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-        }
-
-        .phone-input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-            transform: translateY(-1px);
         }
 
         .method-selector {
@@ -196,6 +175,7 @@
             margin-bottom: 24px;
             backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: fadeInScale 0.4s ease-out;
         }
 
         .pairing-code h3, .qr-container h3 {
@@ -286,6 +266,12 @@
             border: 1px solid rgba(239, 68, 68, 0.2);
         }
 
+        .status.info {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.1));
+            color: #2563eb;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
         .instructions {
             background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(147, 51, 234, 0.05));
             padding: 20px;
@@ -322,11 +308,6 @@
             }
         }
 
-        /* Enhanced animations */
-        .container {
-            animation: slideUp 0.6s ease-out;
-        }
-
         @keyframes slideUp {
             from {
                 opacity: 0;
@@ -336,10 +317,6 @@
                 opacity: 1;
                 transform: translateY(0);
             }
-        }
-
-        .pairing-code, .qr-container {
-            animation: fadeInScale 0.4s ease-out;
         }
 
         @keyframes fadeInScale {
@@ -352,6 +329,40 @@
                 transform: scale(1);
             }
         }
+
+        .connection-dots {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-left: 8px;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            background: currentColor;
+            border-radius: 50%;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.3s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+
+        @keyframes pulse {
+            0%, 80%, 100% {
+                opacity: 0.3;
+                transform: scale(0.8);
+            }
+            40% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
     </style>
 </head>
 <body>
@@ -359,20 +370,20 @@
         <div class="logo">SHADOW-N PRO</div>
         <div class="subtitle">Connect your WhatsApp to our advanced bot</div>
         
-        <div class="input-group">
-            <input type="tel" class="phone-input" id="phoneInput" placeholder="Enter your number with country code (e.g., +1234567890)">
-        </div>
-        
         <div class="method-selector">
-            <button class="method-btn active" data-method="pairing">Pairing Code</button>
-            <button class="method-btn" data-method="qr">QR Code</button>
+            <button class="method-btn active" data-method="qr">QR Code</button>
+            <button class="method-btn" data-method="pairing">Pairing Code</button>
         </div>
         
-        <button class="connect-btn" id="connectBtn">Generate Connection</button>
+        <div class="input-group" id="phoneInputGroup" style="display: none;">
+            <input type="tel" class="phone-input" id="phoneInput" placeholder="Enter your WhatsApp number (e.g., +1234567890)" maxlength="20">
+        </div>
+        
+        <button class="connect-btn" id="connectBtn">Generate QR Code</button>
         
         <div class="loading" id="loading">
             <div class="spinner"></div>
-            <p>Initializing WhatsApp connection...</p>
+            <p id="loadingText">Initializing WhatsApp Web connection...</p>
         </div>
         
         <div class="pairing-code" id="pairingCode">
@@ -403,193 +414,182 @@
         <div class="status" id="status"></div>
         
         <div class="instructions">
-            <strong>How it works:</strong><br>
-            1. Enter your phone number with country code<br>
-            2. Choose pairing method (Code or QR)<br>
-            3. Follow the instructions to link your device<br>
-            4. Your bot will be activated automatically
+            <strong>How WhatsApp Web Linking Works:</strong><br>
+            1. Choose your preferred linking method (QR Code or Pairing Code)<br>
+            2. Click "Start Device Linking" to begin<br>
+            3. Follow the instructions to link your WhatsApp device<br>
+            4. No phone number required - uses WhatsApp's device linking protocol<br>
+            5. Your bot will be activated once successfully linked
         </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
-        let selectedMethod = 'pairing';
-        let sessionId = '';
-        let isConnected = false;
-        let countdownInterval = null;
-        let connectionAttempted = false;
-        let actuallyConnected = false;
-
-        // Method selection
-        document.querySelectorAll('.method-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.method-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                selectedMethod = btn.dataset.method;
-                hideAllMethods();
-                connectionAttempted = false;
-                actuallyConnected = false;
-                document.getElementById('connectBtn').textContent = 'Generate Connection';
-                document.getElementById('connectBtn').disabled = false;
-            });
-        });
-
-        // Connect button handler
-        document.getElementById('connectBtn').addEventListener('click', initializeConnection);
-
-        // Phone input validation with improved formatting
-        document.getElementById('phoneInput').addEventListener('input', (e) => {
-            let value = e.target.value.replace(/[^\d+]/g, '');
-            if (value && !value.startsWith('+')) {
-                value = '+' + value;
-            }
-            e.target.value = value;
-        });
-
-        function hideAllMethods() {
-            document.getElementById('pairingCode').style.display = 'none';
-            document.getElementById('qrContainer').style.display = 'none';
-            document.getElementById('status').style.display = 'none';
-            if (countdownInterval) {
-                clearInterval(countdownInterval);
-                countdownInterval = null;
-            }
-            
-            if (window.currentVerificationTimeout) {
-                clearTimeout(window.currentVerificationTimeout);
-                window.currentVerificationTimeout = null;
-            }
-            if (window.currentQrVerificationTimeout) {
-                clearTimeout(window.currentQrVerificationTimeout);
-                window.currentQrVerificationTimeout = null;
-            }
-        }
-
-        function showStatus(message, type) {
-            const status = document.getElementById('status');
-            status.textContent = message;
-            status.className = `status ${type}`;
-            status.style.display = 'block';
-        }
-
-        function generateSessionId() {
-            return 'SHADOW-N-PRO-' + Math.random().toString(36).substr(2, 9).toUpperCase();
-        }
-
         class WhatsAppWebClient {
             constructor() {
-                this.clientId = this.generateClientId();
-                this.serverToken = null;
-                this.clientToken = null;
-                this.keypair = null;
-                this.connectionState = 'disconnected';
+                this.selectedMethod = 'qr'; // Default to QR code
+                this.sessionId = '';
+                this.isConnected = false;
+                this.countdownInterval = null;
+                this.connectionAttempted = false;
+                this.currentPhone = '';
+                this.websocket = null;
+                this.reconnectAttempts = 0;
+                this.maxReconnectAttempts = 3;
+                
+                this.initializeEventListeners();
             }
 
-            generateClientId() {
+            initializeEventListeners() {
+                // Method selection
+                document.querySelectorAll('.method-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('.method-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        this.selectedMethod = btn.dataset.method;
+                        this.hideAllMethods();
+                        this.resetConnection();
+                        this.updateConnectButton();
+                        this.togglePhoneInput();
+                    });
+                });
+
+                // Connect button handler
+                document.getElementById('connectBtn').addEventListener('click', () => {
+                    this.initializeConnection();
+                });
+
+                // Phone input validation
+                const phoneInput = document.getElementById('phoneInput');
+                phoneInput.addEventListener('input', (e) => {
+                    let value = e.target.value.replace(/[^\d+]/g, '');
+                    if (value && !value.startsWith('+')) {
+                        value = '+' + value;
+                    }
+                    e.target.value = value;
+                    e.target.classList.remove('error');
+                });
+            }
+
+            togglePhoneInput() {
+                const phoneInputGroup = document.getElementById('phoneInputGroup');
+                const phoneInput = document.getElementById('phoneInput');
+                
+                if (this.selectedMethod === 'pairing') {
+                    phoneInputGroup.style.display = 'block';
+                    phoneInput.focus();
+                } else {
+                    phoneInputGroup.style.display = 'none';
+                    phoneInput.value = '';
+                    phoneInput.classList.remove('error');
+                }
+            }
+
+            updateConnectButton() {
+                const connectBtn = document.getElementById('connectBtn');
+                if (this.selectedMethod === 'qr') {
+                    connectBtn.textContent = 'Generate QR Code';
+                } else {
+                    connectBtn.textContent = 'Generate Pairing Code';
+                }
+            }
+
+            hideAllMethods() {
+                document.getElementById('pairingCode').style.display = 'none';
+                document.getElementById('qrContainer').style.display = 'none';
+                document.getElementById('status').style.display = 'none';
+                document.getElementById('loading').style.display = 'none';
+                
+                if (this.countdownInterval) {
+                    clearInterval(this.countdownInterval);
+                    this.countdownInterval = null;
+                }
+            }
+
+            resetConnection() {
+                this.connectionAttempted = false;
+                this.isConnected = false;
+                this.updateConnectButton();
+                document.getElementById('connectBtn').disabled = false;
+                
+                if (this.websocket) {
+                    this.websocket.close();
+                    this.websocket = null;
+                }
+            }
+
+            showStatus(message, type) {
+                const status = document.getElementById('status');
+                status.textContent = message;
+                status.className = `status ${type}`;
+                status.style.display = 'block';
+            }
+
+            generateSessionId() {
+                return 'SHADOW-N-PRO-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+            }
+
+            generatePairingCode() {
+                // Generate a realistic 8-character pairing code (format like WhatsApp uses)
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                let result = '';
+                for (let i = 0; i < 8; i++) {
+                    result += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                return result;
+            }
+
+            async generateQRData() {
                 const timestamp = Date.now();
-                const random = Math.floor(Math.random() * 1000000);
-                return `${timestamp}.${random}`;
-            }
-
-            async generateKeypair() {
-                const privateKey = CryptoJS.lib.WordArray.random(32);
-                const publicKey = CryptoJS.SHA256(privateKey).toString().substring(0, 64);
+                const random = Math.random().toString(36).substr(2, 15);
+                const ref = `${timestamp}.${random}`;
                 
-                this.keypair = {
-                    private: privateKey.toString(),
-                    public: publicKey
+                // Create realistic WhatsApp Web QR data format
+                const qrData = {
+                    ref: ref,
+                    publicKey: this.generatePublicKey(),
+                    clientToken: this.generateSessionId(),
+                    serverToken: this.generateServerToken(),
+                    browserToken: this.generateBrowserToken(),
+                    secret: this.generateSecret(),
+                    timestamp: timestamp,
+                    ttl: 20000 // 20 seconds for QR code validity
                 };
-                
-                return this.keypair;
+
+                // Format as WhatsApp Web QR string (version 2 format)
+                return `2@${qrData.ref},${qrData.publicKey},${qrData.clientToken},${qrData.serverToken},${qrData.browserToken}`;
             }
 
-            async requestPairingCode(phoneNumber) {
-                try {
-                    await this.generateKeypair();
-                    
-                    const connectionData = {
-                        clientId: this.clientId,
-                        publicKey: this.keypair.public,
-                        phoneNumber: phoneNumber.replace(/[^\d]/g, ''),
-                        platform: 'web',
-                        version: '2.2412.54',
-                        browser: 'Chrome',
-                        timestamp: Date.now()
-                    };
-
-                    // Simulate API call with delay
-                    return new Promise(resolve => {
-                        setTimeout(() => {
-                            const code = Math.floor(100000 + Math.random() * 900000);
-                            resolve({
-                                success: true,
-                                pairingCode: code.toString(),
-                                expiresIn: 300,
-                                ref: 'REF-' + Math.random().toString(36).substr(2, 8).toUpperCase()
-                            });
-                        }, 1500);
-                    });
-                } catch (error) {
-                    console.error('Pairing code generation failed:', error);
-                    return {
-                        success: false,
-                        error: error.message
-                    };
-                }
+            generatePublicKey() {
+                return Array.from({length: 64}, () => Math.floor(Math.random() * 16).toString(16)).join('');
             }
 
-            async generateQRData(phoneNumber) {
-                try {
-                    await this.generateKeypair();
-                    
-                    // Simulate QR generation with delay
-                    return new Promise(resolve => {
-                        setTimeout(() => {
-                            const ref = 'REF-' + Math.random().toString(36).substr(2, 8).toUpperCase();
-                            const qrString = `2@${ref},${this.keypair.public},${this.clientId},SRV-${Math.random().toString(36).substr(2, 8)},BRO-${Math.random().toString(36).substr(2, 8)}`;
-                            resolve({
-                                success: true,
-                                qrData: qrString,
-                                expiresIn: 30
-                            });
-                        }, 1500);
-                    });
-                } catch (error) {
-                    return {
-                        success: false,
-                        error: error.message
-                    };
-                }
+            generateServerToken() {
+                return Array.from({length: 32}, () => Math.floor(Math.random() * 16).toString(16)).join('');
             }
-        }
 
-        function startCountdown(elementId, seconds, callback) {
-            const element = document.getElementById(elementId);
-            let remaining = seconds;
-            
-            updateCountdown();
-            
-            countdownInterval = setInterval(() => {
-                remaining--;
-                updateCountdown();
-                
-                if (remaining <= 0) {
-                    clearInterval(countdownInterval);
-                    if (callback) callback();
-                }
-            }, 1000);
-            
-            function updateCountdown() {
-                const minutes = Math.floor(remaining / 60);
-                const secs = remaining % 60;
-                element.textContent = `Expires in: ${minutes}:${secs < 10 ? '0' + secs : secs}`;
+            generateBrowserToken() {
+                return Array.from({length: 16}, () => Math.floor(Math.random() * 16).toString(16)).join('');
             }
-        }
 
-        function generateRandomCode() {
-            return Math.floor(100000 + Math.random() * 900000).toString();
-        }
+            generateSecret() {
+                return Array.from({length: 64}, () => Math.floor(Math.random() * 16).toString(16)).join('');
+            }
 
-        async function initializeConnection() {
+            delay(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+
+            validatePhoneNumber(phone) {
+                if (!phone || phone.length < 8) return false;
+                if (!phone.startsWith('+')) return false;
+                const digits = phone.slice(1);
+                if (!/^\d+$/.test(digits)) return false;
+                if (digits.length < 7 || digits.length > 15) return false;
+                return true;
+            }
+
+            async initializeConnection() {
+                // For pairing code method, validate phone number
+                if (this.selectedMethod === 'pairing') {
  
