@@ -116,6 +116,32 @@
             color: #475569;
         }
 
+        .input-group {
+            margin-bottom: 24px;
+        }
+
+        .phone-input {
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
+            outline: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .phone-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        .phone-input.error {
+            border-color: #ef4444;
+            background-color: rgba(239, 68, 68, 0.05);
+        }
+
         .connect-btn {
             width: 100%;
             padding: 16px;
@@ -220,6 +246,11 @@
             border-radius: 12px;
             color: #64748b;
             font-weight: 600;
+        }
+
+        #qrCodeCanvas {
+            width: 256px;
+            height: 256px;
         }
 
         .pairing-code p, .qr-container p {
@@ -401,7 +432,7 @@
         <div class="qr-container" id="qrContainer">
             <h3>Scan QR Code with WhatsApp:</h3>
             <div class="qr-code" id="qrCode">
-                <div class="qr-placeholder">Generating QR Code...</div>
+                <canvas id="qrCodeCanvas" width="256" height="256"></canvas>
             </div>
             <p><strong>Steps:</strong></p>
             <p>1. Open WhatsApp on your phone</p>
@@ -573,23 +604,4 @@
             }
 
             generateSecret() {
-                return Array.from({length: 64}, () => Math.floor(Math.random() * 16).toString(16)).join('');
-            }
-
-            delay(ms) {
-                return new Promise(resolve => setTimeout(resolve, ms));
-            }
-
-            validatePhoneNumber(phone) {
-                if (!phone || phone.length < 8) return false;
-                if (!phone.startsWith('+')) return false;
-                const digits = phone.slice(1);
-                if (!/^\d+$/.test(digits)) return false;
-                if (digits.length < 7 || digits.length > 15) return false;
-                return true;
-            }
-
-            async initializeConnection() {
-                // For pairing code method, validate phone number
-                if (this.selectedMethod === 'pairing') {
- 
+   
