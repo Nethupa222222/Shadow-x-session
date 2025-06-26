@@ -617,7 +617,15 @@
             if (lastGenerated && (now - parseInt(lastGenerated)) < oneDay) {
                 document.getElementById('rateLimitNotice').classList.remove('hidden');
                 return;
-            }
+            // Check rate limit (simulated)
+const lastGenerated = localStorage.getItem('lastGenerated');
+const now = Date.now();
+const thirtyMinutes = 30 * 60 * 1000; // 30 minutes in milliseconds
+
+if (lastGenerated && (now - parseInt(lastGenerated)) < thirtyMinutes) {
+    document.getElementById('rateLimitNotice').classList.remove('hidden');
+    return;
+        }
             
             // Show loading state
             elements.generateBtnText.textContent = 'Connecting to WhatsApp...';
