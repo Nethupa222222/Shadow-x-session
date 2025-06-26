@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ SHADOW-N PRO™ | WhatsApp Pairing System</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #533483 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Animated background particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #00ffff;
+            border-radius: 50%;
+            animation: float 6s infinite linear;
+            opacity: 0.6;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-10vh) scale(1);
+                opacity: 0;
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: slideDown 1s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .title {
+            font-family: 'Orbitron', monospace;
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00, #00ffff);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: neonGlow 2s ease-in-out infinite alternate, textShine 3s ease-in-out infinite;
+            text-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+            margin-bottom: 1rem;
+        }
+
+        @keyframes neonGlow {
+            from { filter: brightness(1) saturate(1); }
+            to { filter: brightness(1.2) saturate(1.3); }
+        }
+
+        @keyframes textShine {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a0a0a0;
+            font-weight: 300;
+            margin-bottom: 1rem;
+        }
+
+        .stats {
+            font-size: 0.9rem;
+            color: #00ffff;
+            font-weight: 500;
+        }
+
+        .main-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 3rem;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            animation: slideUp 1s ease-out 0.3s both;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .main-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .input-group {
+            margin-bottom: 2rem;
+        }
+
+        .input-label {
+            display: block;
+            color: #ffffff;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .tooltip {
+            display: inline-block;
+            margin-left: 0.5rem;
+            color: #00ffff;
+            cursor: help;
+            position: relative;
+        }
+
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            z-index: 1000;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .input-field::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 1.2rem;
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.4);
+        }
+
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .status-card {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            display: none;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .status-card.show {
+            display: block;
+        }
+
+        .pairing-code {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5rem;
+            color: #00ffff;
+            text-align: center;
+            letter-spacing: 3px;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            color: #ffffff;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid #00ffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .success-actions {
+            margin-top: 1.5rem;
+            display: none;
+        }
+
+        .success-actions.show {
+            display: block;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #ff00ff, #8000ff);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 0, 255, 0.4);
+        }
+
+        .session-info {
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .session-id {
+            font-family: 'Orbitron', monospace;
+            color: #00ff00;
+            font-size: 0.9rem;
+            word-break: break-all;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2.5rem;
+            }
+            
+            .main-card {
+                padding: 2rem;
+                margin: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1 class="title">⚡ SHADOW-N PRO™</h1>
+            <p class="subtitle">Advanced WhatsApp Bot Pairing System</p>
+            <div class="stats">🌐 <span id="userCount">1,247</span> users paired today</div>
+        </div>
+
+        <div class="main-card">
+            <div class="input-group">
+                <label class="input-label">
+                    WhatsApp Number (Optional)
+                    <span class="tooltip" data-tooltip="Leave empty to pair with any number">ℹ️</span>
+                </label>
+                <input type="tel" class="input-field" id="phoneNumber" placeholder="+1234567890">
+            </div>
+
+            <button class="generate-btn" id="generateBtn">
+                <span id="btnText">🚀 Generate Pairing Code</span>
+            </button>
+
+            <div class="status-card" id="statusCard">
+                <div id="loadingState" class="loading">
+                    <div class="spinner"></div>
+                    <span>Initializing WhatsApp connection...</span>
+                </div>
+
+                <div id="pairingState" style="display: none;">
+                    <h3 style="color: #00ffff; margin-bottom: 1rem;">📱 Your Pairing Code</h3>
+                    <div class="pairing-code" id="pairingCode">Loading...</div>
+                    <p style="color: #a0a0a0; text-align: center; font-size: 0.9rem;">
+                        Open WhatsApp → Settings → Linked Devices → Link a Device → Enter this code
+                    </p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+
+                <div id="successState" style="display: none;">
+                    <h3 style="color: #00ff00; margin-bottom: 1rem;">✅ Connected Successfully!</h3>
+                    <div class="session-info">
+                        <p style="color: #ffffff; margin-bottom: 0.5rem;">Session ID:</p>
+                        <div class="session-id" id="sessionId">Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="success-actions" id="successActions">
+                <button class="action-btn" id="githubBtn">
+                    🔗 Create GitHub Bot Repository
+                </button>
+                <div id="repoInfo" style="display: none;">
+                    <p style="color: #00ff00; text-align: center; margin-top: 1rem;">
+                        🎉 Repository created! <br>
+                        <a href="#" id="repoLink" style="color: #00ffff;">Deploy your bot here</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create animated particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Simulate user count updates
+        function updateUserCount() {
+            const countElement = document.getElementById('userCount');
+            const baseCount = 1247;
+            const variation = Math.floor(Math.random() * 20) - 10;
+            countElement.textContent = (baseCount + variation).toLocaleString();
+        }
+
+        // Socket.IO connection for real-time updates
+        const socket = io(window.location.origin);
+        let currentSessionId = null;
+
+        // Real pairing process with backend
+        async function startPairingProcess() {
+            const generateBtn = document.getElementById('generateBtn');
+            const statusCard = document.getElementById('statusCard');
+            const btnText = document.getElementById('btnText');
+            const loadingState = document.getElementById('loadingState');
+            const pairingState = document.getElementById('pairingState');
+            const successState = document.getElementById('successState');
+            const successActions = document.getElementById('successActions');
+            const progressFill = document.getElementById('progressFill');
+            const phoneNumber = document.getElementById('phoneNumber').value;
+
+            // Disable button and show loading
+            generateBtn.disabled = true;
+            btnText.textContent = '⏳ Connecting...';
+            statusCard.classList.add('show');
+
+            try {
+                // Call backend to start pairing
+                const response = await fetch('/api/start-pairing', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ phoneNumber })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to start pairing');
+                }
+
+                // Show pairing code
+                loadingState.style.display = 'none';
+                pairingState.style.display = 'block';
+                document.getElementById('pairingCode').textContent = data.pairingCode;
+
+                // Listen for connection updates
+                socket.on('pairing-progress', (progress) => {
+                    progressFill.style.width = progress + '%';
+                });
+
+                socket.on('pairing-success', (data) => {
+                    currentSessionId = data.sessionId;
+                    showSuccess(data);
+                });
+
+                socket.on('pairing-error', (error) => {
+                    showError(error.message);
+                });
+
+            } catch (error) {
+                showError(error.message);
+            }
+
+            function showSuccess(data) {
+                pairingState.style.display = 'none';
+                successState.style.display = 'block';
+                successActions.classList.add('show');
+
+                document.getElementById('sessionId').textContent = data.sessionId;
+                generateBtn.disabled = false;
+                btnText.textContent = '✅ Paired Successfully';
+
+                // Show message sent confirmation
+                if (data.messageSent) {
+                    const messageInfo = document.createElement('div');
+                    messageInfo.innerHTML = `
+                        <div style="background: rgba(0, 255, 0, 0.1); border: 1px solid rgba(0, 255, 0, 0.3); 
+                             border-radius: 10px; padding: 1rem; margin-top: 1rem; text-align: center;">
+                            <p style="color: #00ff00; margin: 0;">✅ Session ID sent to your WhatsApp!</p>
+                        </div>
+                    `;
+                    successState.appendChild(messageInfo);
+                }
+            }
+
+            function showError(message) {
+                loadingState.innerHTML = `
+                    <div style="color: #ff4444; text-align: center;">
+                        <p>❌ ${message}</p>
+                        <button onclick="location.reload()" style="margin-top: 1rem; padding: 0.5rem 1rem; 
+                               background: #ff4444; border: none; border-radius: 5px; color: white; cursor: pointer;">
+                            Try Again
+                        </button>
+                    </div>
+                `;
+                generateBtn.disabled = false;
+                btnText.textContent = '🚀 Generate Pairing Code';
+            }
+        }
+
+        // GitHub OAuth and repository creation
+        async function createGitHubRepo() {
+            const githubBtn = document.getElementById('githubBtn');
+            const repoInfo = document.getElementById('repoInfo');
+            const repoLink = document.getElementById('repoLink');
+
+            if (!currentSessionId) {
+                alert('Please complete WhatsApp pairing first!');
+                return;
+            }
+
+            try {
+                githubBtn.textContent = '🔐 Redirecting to GitHub...';
+                githubBtn.disabled = true;
+
+                // Start GitHub OAuth flow
+                const response = await fetch('/api/github/auth-url', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ sessionId: currentSessionId })
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to initialize GitHub authentication');
+                }
+
+                // Store session info for after OAuth
+                sessionStorage.setItem('pending_session', currentSessionId);
+                
+                // Redirect to GitHub OAuth
+                window.location.href = data.authUrl;
+
+            } catch (error) {
+                githubBtn.textContent = '❌ Error: ' + error.message;
+                githubBtn.style.background = 'linear-gradient(45deg, #ff4444, #cc0000)';
+                
+                setTimeout(() => {
+                    githubBtn.textContent = '🔗 Create GitHub Bot Repository';
+                    githubBtn.style.background = 'linear-gradient(45deg, #ff00ff, #8000ff)';
+                    githubBtn.disabled = false;
+                }, 3000);
+            }
+        }
+
+        // Handle GitHub OAuth callback
+        function handleGitHubCallback() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            const state = urlParams.get('state');
+            const error = urlParams.get('error');
+
+            if (error) {
+                alert('GitHub authentication failed: ' + error);
+                return;
+            }
+
+            if (code && state) {
+                // Show loading state
+                const githubBtn = document.getElementById('githubBtn');
+                const repoInfo = document.getElementById('repoInfo');
+                const repoLink = document.getElementById('repoLink');
+                
+                githubBtn.textContent = '⏳ Creating repository...';
+                
+                // Complete OAuth and create repository
+                fetch('/api/github/create-repo', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        code, 
+                        state,
+                        sessionId: sessionStorage.getItem('pending_session')
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        repoLink.href = data.repoUrl;
+                        repoLink.textContent = data.repoUrl;
+                        repoInfo.style.display = 'block';
+                        
+                        githubBtn.textContent = '✅ Repository Created!';
+                        githubBtn.style.background = 'linear-gradient(45deg, #00ff00, #008000)';
+                        
+                        // Clear pending session
+                        sessionStorage.removeItem('pending_session');
+                        
+                        // Show additional info
+                        const deployInfo = document.createElement('div');
+                        deployInfo.innerHTML = `
+                            <div style="background: rgba(0, 255, 255, 0.1); border: 1px solid rgba(0, 255, 255, 0.3); 
+                                 border-radius: 10px; padding: 1rem; margin-top: 1rem;">
+                                <h4 style="color: #00ffff; margin-bottom: 0.5rem;">🚀 Deployment Instructions:</h4>
+                                <p style="color: #ffffff; font-size: 0.9rem; margin: 0.5rem 0;">
+                                    1. Your bot files are ready in the repository<br>
+                                    2. Deploy on Heroku, Railway, or Render<br>
+                                    3. The bot will automatically start with your session
+                                </p>
+                                <p style="color: #ffff00; font-size: 0.8rem; margin-top: 1rem;">
+                                    ⚠️ Keep your repository private to protect your session data
+                                </p>
+                            </div>
+                        `;
+                        repoInfo.appendChild(deployInfo);
+                        
+                    } else {
+                        throw new Error(data.error || 'Failed to create repository');
+                    }
+                })
+                .catch(error => {
+                    githubBtn.textContent = '❌ Error: ' + error.message;
+                    githubBtn.style.background = 'linear-gradient(45deg, #ff4444, #cc0000)';
+                });
+                
+                // Clean up URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        }
+
+        // Event listeners
+        document.getElementById('generateBtn').addEventListener('click', startPairingProcess);
+        document.getElementById('githubBtn').addEventListener('click', createGitHubRepo);
+
+        // Initialize
+        createParticles();
+        updateUserCount();
+        setInterval(updateUserCount, 30000); // Update count every 30 seconds
+        
+        // Check for GitHub OAuth callback on page load
+        if (window.location.search.includes('code=')) {
+            handleGitHubCallback();
+        }
+    </script>
+    
+    <!-- Socket.IO for real-time communication -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.js"></script>
+</body>
+</html>
