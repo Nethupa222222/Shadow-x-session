@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shadow-N Pro™ - WhatsApp Bot Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: linear-gradient(45deg, #00f5ff, #0066ff);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+            box-shadow: 0 0 10px #00f5ff;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .blob {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, rgba(0, 245, 255, 0.1), rgba(0, 102, 255, 0.1));
+            filter: blur(40px);
+            animation: blob 8s ease-in-out infinite;
+        }
+
+        @keyframes blob {
+            0%, 100% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            position: relative;
+        }
+
+        .logo {
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #00f5ff, #0066ff, #00f5ff);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradient 3s ease infinite;
+            text-shadow: 0 0 30px rgba(0, 245, 255, 0.5);
+            margin-bottom: 10px;
+        }
+
+        @keyframes gradient {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a0a0a0;
+            margin-bottom: 20px;
+        }
+
+        .slogan {
+            font-size: 1rem;
+            color: #00f5ff;
+            font-weight: 600;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        /* Stats */
+        .stats {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .stat-counter {
+            display: inline-block;
+            background: rgba(0, 245, 255, 0.1);
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            border-radius: 25px;
+            padding: 10px 20px;
+            margin: 0 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #00f5ff;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #a0a0a0;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Glass Cards */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 245, 255, 0.2);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #00f5ff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #e0e0e0;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #00f5ff;
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
+        }
+
+        .form-input::placeholder {
+            color: #a0a0a0;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #00f5ff, #0066ff);
+            border: none;
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 245, 255, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #333, #555);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 10px 30px rgba(85, 85, 85, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Status Indicators */
+        .status {
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-pending {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        .status-success {
+            background: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+            border: 1px solid rgba(40, 167, 69, 0.3);
+        }
+
+        .status-error {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.3);
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid #00f5ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Grid Layout */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        /* Hidden by default */
+        .hidden {
+            display: none;
+        }
+
+        /* Pairing Code Display */
+        .pairing-code {
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #00f5ff;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .pairing-code-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #00f5ff;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+        }
+
+        /* Download Area */
+        .download-area {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 245, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 245, 255, 0.2);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 60px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2.5rem;
+            }
+            
+            .glass-card {
+                padding: 20px;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Success Animation */
+        @keyframes checkmark {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .checkmark {
+            animation: checkmark 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation" id="bgAnimation"></div>
+
+    <!-- Header -->
+    <div class="header">
+        <h1 class="logo">SHADOW-N PRO™</h1>
+        <p class="subtitle">Advanced WhatsApp Bot Generator</p>
+        <p class="slogan">✨ Generate • Connect • Deploy • Dominate ✨</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+        <div class="stat-counter">
+            <div class="stat-number" id="totalSessions">1,247</div>
+            <div class="stat-label">Total Sessions</div>
+        </div>
+        <div class="stat-counter">
+            <div class="stat-number" id="todaySessions">83</div>
+            <div class="stat-label">Today</div>
+        </div>
+        <div class="stat-counter">
+            <div class="stat-number" id="activeBots">456</div>
+            <div class="stat-label">Active Bots</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Step 1: Phone Number Input -->
+        <div class="glass-card" id="step1">
+            <h2 class="card-title">
+                <span>🔥</span> Step 1: Generate Pairing Code
+            </h2>
+            <div class="form-group">
+                <label class="form-label">Enter your phone number (with country code)</label>
+                <input type="tel" class="form-input" id="phoneNumber" placeholder="+1234567890" />
+            </div>
+            <button class="btn btn-full" id="generateBtn">
+                <span id="generateBtnText">Generate Pairing Code</span>
+                <div class="spinner hidden" id="generateSpinner"></div>
+            </button>
+        </div>
+
+        <!-- Step 2: Pairing Status -->
+        <div class="glass-card hidden" id="step2">
+            <h2 class="card-title">
+                <span>🔐</span> Step 2: Pair Your Device
+            </h2>
+            <div id="pairingStatus"></div>
+            <div class="pairing-code hidden" id="pairingCodeDisplay">
+                <p>Enter this code in your WhatsApp:</p>
+                <div class="pairing-code-number" id="pairingCodeNumber"></div>
+                <p style="color: #a0a0a0; margin-top: 10px;">Code expires in <span id="countdown">5:00</span></p>
+            </div>
+        </div>
+
+        <!-- Step 3: Session Ready -->
+        <div class="glass-card hidden" id="step3">
+            <h2 class="card-title">
+                <span>✅</span> Step 3: Session Created
+            </h2>
+            <div class="status status-success">
+                <span class="checkmark">✓</span>
+                Session successfully created! ID: <span id="sessionId"></span>
+            </div>
+            <div class="download-area">
+                <p>Your bot files are ready for download and deployment!</p>
+                <button class="btn btn-full" id="downloadBtn" style="margin-top: 15px;">
+                    📦 Download Session Files
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 4: GitHub Integration -->
+        <div class="glass-card hidden" id="step4">
+            <h2 class="card-title">
+                <span>☁️</span> Step 4: Deploy to GitHub
+            </h2>
+            <p style="margin-bottom: 20px;">Connect your GitHub account to automatically create a repository with your bot files.</p>
+            <button class="btn btn-full" id="githubBtn">
+                <span>🔗 Connect GitHub Account</span>
+            </button>
+        </div>
+
+        <!-- Step 5: Deployment -->
+        <div class="glass-card hidden" id="step5">
+            <h2 class="card-title">
+                <span>🚀</span> Step 5: Deploy Your Bot
+            </h2>
+            <div class="status status-success">
+                <span class="checkmark">✓</span>
+                Repository created: <a href="#" id="repoLink" target="_blank" style="color: #00f5ff;">View on GitHub</a>
+            </div>
+            <div class="grid">
+                <div>
+                    <h3 style="color: #00f5ff; margin-bottom: 15px;">Deploy Options</h3>
+                    <button class="btn btn-full" id="railwayBtn" style="margin-bottom: 10px;">
+                        🚄 Deploy to Railway
+                    </button>
+                    <button class="btn btn-secondary btn-full" id="herokuBtn">
+                        🟣 Deploy to Heroku
+                    </button>
+                </div>
+                <div>
+                    <h3 style="color: #00f5ff; margin-bottom: 15px;">Quick Actions</h3>
+                    <button class="btn btn-secondary btn-full" id="restartBtn" style="margin-bottom: 10px;">
+                        🔄 Generate New Session
+                    </button>
+                    <button class="btn btn-secondary btn-full" id="supportBtn">
+                        💬 Get Support
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rate Limit Notice -->
+        <div class="glass-card hidden" id="rateLimitNotice">
+            <h2 class="card-title">
+                <span>🚫</span> Rate Limited
+            </h2>
+            <div class="status status-error">
+                <span>⚠️</span>
+                You've already generated a session today. Please try again tomorrow.
+            </div>
+            <p style="color: #a0a0a0; margin-top: 15px;">
+                This restriction helps us maintain service quality and prevent abuse.
+            </p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>&copy; 2025 Shadow-N Pro™. Advanced WhatsApp automation technology.</p>
+        <p style="margin-top: 10px; color: #00f5ff;">Secure • Fast • Reliable</p>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <script>
+        // Initialize Socket.IO connection
+        const socket = io();
+        
+        // State management
+        let currentStep = 1;
+        let sessionData = {};
+        let countdownInterval;
+
+        // DOM elements
+        const elements = {
+            phoneNumber: document.getElementById('phoneNumber'),
+            generateBtn: document.getElementById('generateBtn'),
+            generateBtnText: document.getElementById('generateBtnText'),
+            generateSpinner: document.getElementById('generateSpinner'),
+            pairingStatus: document.getElementById('pairingStatus'),
+            pairingCodeDisplay: document.getElementById('pairingCodeDisplay'),
+            pairingCodeNumber: document.getElementById('pairingCodeNumber'),
+            countdown: document.getElementById('countdown'),
+            sessionId: document.getElementById('sessionId'),
+            downloadBtn: document.getElementById('downloadBtn'),
+            githubBtn: document.getElementById('githubBtn'),
+            repoLink: document.getElementById('repoLink'),
+            railwayBtn: document.getElementById('railwayBtn'),
+            herokuBtn: document.getElementById('herokuBtn'),
+            restartBtn: document.getElementById('restartBtn'),
+            supportBtn: document.getElementById('supportBtn')
+        };
+
+        // Initialize background animation
+        function initBackgroundAnimation() {
+            const bgAnimation = document.getElementById('bgAnimation');
+            
+            // Create particles
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                bgAnimation.appendChild(particle);
+            }
+            
+            // Create blobs
+            for (let i = 0; i < 3; i++) {
+                const blob = document.createElement('div');
+                blob.className = 'blob';
+                blob.style.left = Math.random() * 100 + '%';
+                blob.style.top = Math.random() * 100 + '%';
+                blob.style.animationDelay = Math.random() * 8 + 's';
+                bgAnimation.appendChild(blob);
+            }
+        }
+
+        // Show/hide steps
+        function showStep(step) {
+            // Hide all steps
+            for (let i = 1; i <= 5; i++) {
+                const stepElement = document.getElementById(`step${i}`);
+                if (stepElement) {
+                    stepElement.classList.add('hidden');
+                }
+            }
+            
+            // Show current step
+            const currentStepElement = document.getElementById(`step${step}`);
+            if (currentStepElement) {
+                currentStepElement.classList.remove('hidden');
+            }
+            
+            currentStep = step;
+        }
+
+        // Update stats (simulated)
+        function updateStats() {
+            const stats = {
+                total: document.getElementById('totalSessions'),
+                today: document.getElementById('todaySessions'),
+                active: document.getElementById('activeBots')
+            };
+            
+            // Simulate real-time updates
+            setInterval(() => {
+                if (Math.random() < 0.1) { // 10% chance every second
+                    const current = parseInt(stats.today.textContent);
+                    stats.today.textContent = current + 1;
+                    
+                    const totalCurrent = parseInt(stats.total.textContent);
+                    stats.total.textContent = totalCurrent + 1;
+                }
+            }, 1000);
+        }
+
+        // Phone number validation
+        function validatePhoneNumber(phone) {
+            const phoneRegex = /^\+[1-9]\d{1,14}$/;
+            return phoneRegex.test(phone);
+        }
+
+        // Generate pairing code
+        function generatePairingCode() {
+            const phone = elements.phoneNumber.value.trim();
+            
+            if (!validatePhoneNumber(phone)) {
+                showStatus('error', 'Please enter a valid phone number with country code (e.g., +1234567890)');
+                return;
+            }
+            
+            // Check rate limit (simulated)
+            const lastGenerated = localStorage.getItem('lastGenerated');
+            const now = Date.now();
+            const oneDay = 24 * 60 * 60 * 1000;
+            
+            if (lastGenerated && (now - parseInt(lastGenerated)) < oneDay) {
+                document.getElementById('rateLimitNotice').classList.remove('hidden');
+                return;
+            }
+            
+            // Show loading state
+            elements.generateBtnText.textContent = 'Connecting to WhatsApp...';
+            elements.generateSpinner.classList.remove('hidden');
+            elements.generateBtn.disabled = true;
+            
+            // Emit request to backend for real WhatsApp pairing
+            socket.emit('generate-pairing-code', {
+                phoneNumber: phone,
+                userIP: getUserIP() // For rate limiting
+            });
+            
+            // Show step 2 immediately with loading state
+            showStep(2);
+            showStatus('pending', 'Initializing WhatsApp connection...');
+        }
+
+        // Show status message
+        function showStatus(type, message) {
+            const statusDiv = elements.pairingStatus;
+            statusDiv.className = `status status-${type}`;
+            statusDiv.innerHTML = `
+                <span>${type === 'pending' ? '⏳' : type === 'success' ? '✓' : '⚠️'}</span>
+                ${message}
+            `;
+        }
+
+        // Start countdown timer
+        function startCountdown(seconds) {
+            let timeLeft = seconds;
+            
+            countdownInterval = setInterval(() => {
+                const minutes = Math.floor(timeLeft / 60);
+                const secs = timeLeft % 60;
+                elements.countdown.textContent = `${minutes}:${secs.toString().padStart(2, '0')}`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    showStatus('error', 'Pairing code expired. Please generate a new one.');
+                    setTimeout(() => showStep(1), 3000);
+                }
+                
+                timeLeft--;
+            }, 1000);
+        }
+
+        // Show session ready
+        function showSessionReady() {
+            clearInterval(countdownInterval);
+            elements.sessionId.textContent = sessionData.id;
+            showStep(3);
+            
+            // Show GitHub step after 2 seconds
+            setTimeout(() => {
+                document.getElementById('step4').classList.remove('hidden');
+            }, 2000);
+        }
+
+        // Handle GitHub connection
+        function connectGitHub() {
+            // Simulate GitHub OAuth flow
+            elements.githubBtn.innerHTML = '<div class="spinner"></div> Connecting...';
+            elements.githubBtn.disabled = true;
+            
+            setTimeout(() => {
+                // Simulate successful connection
+                const repoName = `shadow-n-bot-${Date.now()}`;
+                elements.repoLink.href = `https://github.com/user/${repoName}`;
+                elements.repoLink.textContent = `user/${repoName}`;
+                
+                showStep(5);
+            }, 3000);
+        }
+
+        // Download session files
+        function downloadSession() {
+            // Create a simulated download
+            const zipContent = `Shadow-N Pro Session Files
+Session ID: ${sessionData.id}
+Created: ${new Date().toLocaleString()}
+
+Files included:
+- package.json
+- start.js
+- session.json
+- README.md
+
+Visit https://shadow-n-pro.com for support.`;
+            
+            const blob = new Blob([zipContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `shadow-n-session-${sessionData.id}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Deploy to Railway
+        function deployToRailway() {
+            const url = `https://railway.app/new/template?template=https://github.com/user/shadow-n-bot-${Date.now()}`;
+            window.open(url, '_blank');
+        }
+
+        // Deploy to Heroku
+        function deployToHeroku() {
+            const url = `https://heroku.com/deploy?template=https://github.com/user/shadow-n-bot-${Date.now()}`;
+            window.open(url, '_blank');
+        }
+
+        // Restart process
+        function restart() {
+            location.reload();
+        }
+
+        // Get support
+        function getSupport() {
+            window.open('https://t.me/shadowsupport', '_blank');
+        }
+
+        // Event listeners
+        elements.generateBtn.addEventListener('click', generatePairingCode);
+        elements.downloadBtn.addEventListener('click', downloadSession);
+        elements.githubBtn.addEventListener('click', connectGitHub);
+        elements.railwayBtn.addEventListener('click', deployToRailway);
+        elements.herokuBtn.addEventListener('click', deployToHeroku);
+        elements.restartBtn.addEventListener('click', restart);
+        elements.supportBtn.addEventListener('click', getSupport);
+
+        // Enter key support
+        elements.phoneNumber.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                generatePairingCode();
+            }
+        });
+
+        // Socket.IO event handlers
+        socket.on('connect', () => {
+            console.log('Connected to Shadow-N Pro server');
+        });
+
+        socket.on('whatsapp-initializing', () => {
+            showStatus('pending', 'Initializing WhatsApp Web connection...');
+        });
+
+        socket.on('pairing-code-generated', (data) => {
+            console.log('Received pairing code:', data.code);
+            elements.pairingCodeNumber.textContent = data.code;
+            elements.pairingCodeDisplay.classList.remove('hidden');
+            showStatus('pending', 'Enter this code in WhatsApp > Linked Devices > Link a Device');
+            
+            // Start countdown (usually 60 seconds for WhatsApp pairing codes)
+            startCountdown(60);
+        });
+
+        socket.on('pairing-code-used', () => {
+            showStatus('pending', 'Pairing code entered! Waiting for confirmation...');
+            clearInterval(countdownInterval);
+        });
+
+        socket.on('whatsapp-connected', (data) => {
+            console.log('WhatsApp connected successfully:', data);
+            clearInterval(countdownInterval);
+            
+            sessionData = {
+                id: data.sessionId,
+                phone: data.phoneNumber,
+                created: data.timestamp,
+                sessionData: data.sessionData // The actual session.json content
+            };
+            
+            // Store rate limit info
+            localStorage.setItem('lastGenerated', Date.now().toString());
+            
+            showSessionReady();
+        });
+
+        socket.on('whatsapp-disconnected', () => {
+            showStatus('error', 'WhatsApp connection lost. Please try again.');
+            setTimeout(() => {
+                // Reset to step 1
+                elements.generateBtnText.textContent = 'Generate Pairing Code';
+                elements.generateSpinner.classList.add('hidden');
+                elements.generateBtn.disabled = false;
+                showStep(1);
+            }, 3000);
+        });
+
+        socket.on('pairing-timeout', () => {
+            clearInterval(countdownInterval);
+            showStatus('error', 'Pairing code expired. Please generate a new one.');
+            setTimeout(() => {
+                // Reset to step 1
+                elements.generateBtnText.textContent = 'Generate Pairing Code';
+                elements.generateSpinner.classList.add('hidden');
+                elements.generateBtn.disabled = false;
+                showStep(1);
+            }, 3000);
+        });
+
+        socket.on('rate-limited', (data) => {
+            console.log('Rate limited:', data);
+            document.getElementById('rateLimitNotice').classList.remove('hidden');
+            // Hide step 1
+            document.getElementById('step1').classList.add('hidden');
+        });
+
+        socket.on('error', (error) => {
+            console.error('Socket error:', error);
+            showStatus('error', error.message || 'An error occurred. Please try again.');
+            
+            // Reset button state
+            elements.generateBtnText.textContent = 'Generate Pairing Code';
+            elements.generateSpinner.classList.add('hidden');
+            elements.generateBtn.disabled = false;
+        });
+
+        socket.on('session-files-ready', (data) => {
+            console.log('Session files ready:', data);
+            sessionData.downloadUrl = data.downloadUrl;
+            sessionData.zipFileName = data.fileName;
+        });
+
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', () => {
+            initBackgroundAnimation();
+            updateStats();
+            showStep(1);
+        });
+    </script>
+</body>
+</html>
