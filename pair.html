@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SHADOW-N PRO™ | Pairing Site</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .card {
+      background-color: rgba(0, 0, 0, 0.4);
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.5);
+      text-align: center;
+    }
+    input, button {
+      padding: 10px;
+      margin: 10px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: none;
+    }
+    input {
+      width: 250px;
+    }
+    button {
+      background-color: #4caf50;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>SHADOW-N PRO™ WhatsApp Pairing</h2>
+    <input type="text" id="number" placeholder="Enter your WhatsApp number" />
+    <button onclick="pair()">Generate Pairing Code</button>
+    <p id="output"></p>
+  </div>
+
+  <script>
+    async function pair() {
+      const number = document.getElementById("number").value;
+      const output = document.getElementById("output");
+      output.textContent = "Processing...";
+
+      const res = await fetch("/api/pair", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ number })
+      });
+
+      const data = await res.json();
+      if (data.pairingCode) {
+        output.textContent = "Pairing Code: " + data.pairingCode;
+      } else {
+        output.textContent = data.error || "Something went wrong.";
+      }
+    }
+  </script>
+</body>
+</html>
