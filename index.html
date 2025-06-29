@@ -1,71 +1,57 @@
+<!-- public/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SHADOW-N PRO™ | Pairing Site</title>
+  <meta charset="UTF-8">
+  <title>SHADOW-X PRO™ Pairing</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
-      color: #fff;
+      background: black;
+      color: lime;
+      font-family: 'Orbitron', sans-serif;
       display: flex;
-      flex-direction: column;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       height: 100vh;
-      margin: 0;
-    }
-    .card {
-      background-color: rgba(0, 0, 0, 0.4);
-      padding: 2rem;
-      border-radius: 15px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.5);
-      text-align: center;
-    }
-    input, button {
-      padding: 10px;
-      margin: 10px;
-      font-size: 1rem;
-      border-radius: 8px;
-      border: none;
+      flex-direction: column;
     }
     input {
+      font-size: 18px;
+      padding: 10px;
+      margin-top: 20px;
       width: 250px;
+      border: 2px solid lime;
+      background: #111;
+      color: lime;
     }
     button {
-      background-color: #4caf50;
-      color: white;
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: lime;
+      color: black;
+      font-weight: bold;
+      border: none;
       cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h2>SHADOW-N PRO™ WhatsApp Pairing</h2>
-    <input type="text" id="number" placeholder="Enter your WhatsApp number" />
-    <button onclick="pair()">Generate Pairing Code</button>
-    <p id="output"></p>
-  </div>
+  <h1>🔒 SHADOW-X PRO™ PAIRING</h1>
+  <p>Enter your WhatsApp pairing code:</p>
+  <input id="pairingCode" type="text" placeholder="e.g. XXX-XXX" />
+  <button onclick="submitCode()">Connect</button>
 
   <script>
-    async function pair() {
-      const number = document.getElementById("number").value;
-      const output = document.getElementById("output");
-      output.textContent = "Processing...";
-
-      const res = await fetch("/api/pair", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ number })
+    async function submitCode() {
+      const code = document.getElementById('pairingCode').value;
+      const res = await fetch('/api/pair', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code })
       });
-
-      const data = await res.json();
-      if (data.pairingCode) {
-        output.textContent = "Pairing Code: " + data.pairingCode;
-      } else {
-        output.textContent = data.error || "Something went wrong.";
-      }
+      const result = await res.json();
+      alert(result.message);
     }
   </script>
 </body>
